@@ -3,12 +3,9 @@ use std::collections::{HashSet, HashMap};
 
 pub fn solve(input : String, part: Part) -> String {
 
-    let lines:Vec<&str> = input.lines()
-        .collect();
-
     let result = match part {
         Part::Part1 => part1(parse(input.as_str())),
-        Part::Part2 => part2(lines)
+        Part::Part2 => part2(parse(input.as_str()), 10000),
     };
 
     format!("{}",result)
@@ -64,8 +61,30 @@ fn part1(points:Vec<(i32,i32)>) -> i32 {
     map.iter().filter(|(&k,_)| !border_points.contains(&k)).map(|(_,v)| *v).max().unwrap()
 }
 
-fn part2(input:Vec<&str>) -> i32 {
-    2
+fn part2(points:Vec<(i32,i32)>, limit:i32) -> i32 {
+    let mut map = HashMap::new();
+    let max_x = points.iter().map(|item| item.0).max().unwrap();
+    let min_x = points.iter().map(|item| item.0).min().unwrap();
+    let max_y = points.iter().map(|item| item.1).max().unwrap();
+    let min_y = points.iter().map(|item| item.1).min().unwrap();
+
+    for x in min_x..max_x+1 {
+        for y in min_y..max_y+1 {
+
+            // Measure distance to each point and select the closest one...
+            let mut dist_sum = 0;
+            for (p_x,p_y) in points.iter() {
+                let dist = (x-*p_x).abs() + (y-*p_y).abs();
+                dist_sum += dist;
+            }
+
+            if dist_sum < limit {
+                map.insert( (x,y), dist_sum);
+            }
+        }
+    }
+
+    map.iter().count() as i32
 }
 
 
@@ -88,6 +107,20 @@ mod tests {
         let res = part1(parse(input));
         println!("{:?}", res);
         assert_eq!(17, res);
+    }
+
+    #[test]
+    fn test2() {
+        let input = "1, 1
+1, 6
+8, 3
+3, 4
+5, 5
+8, 9";
+        //let res = part1(input.lines().collect());
+        let res = part2(parse(input), 32);
+        println!("{:?}", res);
+        assert_eq!(16, res);
     }
 
 }
