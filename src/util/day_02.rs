@@ -1,5 +1,4 @@
 use super::Part;
-use std::collections::HashSet;
 
 pub fn solve(input : String, part: Part) -> String {
 
@@ -42,7 +41,7 @@ fn part1(input:Vec<&str>) -> String {
     format!("{}",twos * threes)
 }
 
-fn part2(mut input:Vec<&str>) -> String {
+fn part2(input:Vec<&str>) -> String {
     let mut res = String::new();
 
     for i in 0..input.len()-1 {
@@ -73,8 +72,6 @@ fn part2(mut input:Vec<&str>) -> String {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::util::Part::Part1;
-
 
     #[test]
     fn test1() {
