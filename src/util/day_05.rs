@@ -20,7 +20,7 @@ fn part1(mut input:VecDeque<char>) -> u32 {
 
     let mut found_reaction = true;
     let mut next_index = 0;
-    
+
     while found_reaction {
         found_reaction = false;
 
@@ -102,7 +102,5 @@ mod tests {
         assert_eq!(5148, res);
 
     }
-
-
 
 }
