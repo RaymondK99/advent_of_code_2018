@@ -38,8 +38,6 @@ fn get_map(input:&Vec<&str>) -> HashMap<u32,[u32;60]> {
             let m: u32 = caps.get(5).unwrap().as_str().parse().ok().unwrap();
             let s = caps.get(6).unwrap().as_str();
 
-            //println!("{}-{}-{} {}:{} => {}",yyyy,mm,dd,h,m,s);
-
             // Begins shift
             if s.contains("Guard") {
                 let guard_cap = r2.captures(s).unwrap();
@@ -100,8 +98,25 @@ fn part1(mut input:Vec<&str>) -> u32 {
 
 }
 
-fn part2(input:Vec<&str>) -> u32 {
-    2
+fn part2(mut input:Vec<&str>) -> u32 {
+    input.sort();
+    let map = get_map(&input);
+
+    let mut max_guard_no = 0;
+    let mut max_min_index = 0;
+    let mut max_min_value = 0;
+
+    for (num, mins) in map.iter() {
+        for i in 0..mins.len() {
+            if mins[i] > max_min_value {
+                max_min_value = mins[i];
+                max_min_index = i as u32;
+                max_guard_no = *num;
+            }
+        }
+    }
+
+    max_guard_no * max_min_index
 }
 
 
@@ -111,7 +126,7 @@ mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
-    const input:&str = "[1518-10-03 00:47] falls asleep
+    const INPUT:&str = "[1518-10-03 00:47] falls asleep
 [1518-07-26 23:50] Guard #487 begins shift
 [1518-06-22 00:48] wakes up
 [1518-08-21 00:30] falls asleep
@@ -1160,14 +1175,15 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        let res = part1(input.lines().collect());
+        let res = part1(INPUT.lines().collect());
         println!("{}", res);
         assert_eq!(72925, res);
     }
 
     #[test]
     fn test_part2() {
-        let res = part2(input.lines().collect());
+        let res = part2(INPUT.lines().collect());
         println!("{}", res);
+        assert_eq!(49137, res);
     }
 }
