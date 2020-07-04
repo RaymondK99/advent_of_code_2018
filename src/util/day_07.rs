@@ -1,6 +1,7 @@
 use super::Part;
-use std::collections::{HashSet};
+use std::collections::{HashSet, BinaryHeap};
 use regex::Regex;
+use std::cmp::Ordering;
 
 pub fn solve(input : String, part: Part) -> String {
 
@@ -9,7 +10,7 @@ pub fn solve(input : String, part: Part) -> String {
 
     let result = match part {
         Part::Part1 => part1(parse(lines)),
-        Part::Part2 => part2(lines)
+        Part::Part2 => part2(parse(lines),5,60)
     };
 
     format!("{}",result)
@@ -57,6 +58,35 @@ fn next_root_node(input:&mut Vec<(char,char)>) -> Option<(char,char)> {
     res
 }
 
+fn peek_root_nodes(input:&Vec<(char,char)>) -> Vec<char> {
+    // Which of the parents is not a child node?
+    let parent_nodes: HashSet<char> = input.iter().map(|(c1, _)| *c1).collect();
+    let child_nodes: HashSet<char> = input.iter().map(|(_, c2)| *c2).collect();
+
+    let mut root_nodes: Vec<char> = parent_nodes.iter().filter(|&p| !child_nodes.contains(p)).map(|p| *p).collect();
+    root_nodes.sort();
+
+    let mut root_pairs:Vec<(char,char)> = input.iter().filter(|(p,_)| root_nodes.contains(p)).map(|(p,c)|(*p,*c)).collect();
+    root_pairs.sort();
+
+    //root_pairs
+    root_nodes.to_vec()
+}
+
+fn remove_node(item:char, input:&mut Vec<(char,char)>) {
+    //let mut element = input.iter().find(|(p,_)| *p == item).clone();
+    loop {
+        let element = input.iter().enumerate().find(|(_,(p,_))| *p == item);
+        if element.is_some() {
+            let index = element.unwrap().0;
+            input.remove(index);
+        } else {
+            break;
+        }
+    }
+
+}
+
 fn part1( mut input:Vec<(char,char)>) -> String {
     let mut result = vec![];
 
@@ -74,10 +104,78 @@ fn part1( mut input:Vec<(char,char)>) -> String {
     result.iter().collect()
 }
 
-fn part2( input:Vec<&str>) -> String {
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct Worker {
+    t_finish:u32,
+    item:char,
+}
 
-    String::from("2323")
+impl Ord for Worker {
+    fn cmp(&self, other: &Worker) -> Ordering {
+        other.t_finish.cmp(&self.t_finish)
+            .then_with(|| other.item.cmp(&self.item))
+    }
+}
 
+impl PartialOrd for Worker {
+    fn partial_cmp(&self, other: &Worker) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn part2(mut input:Vec<(char,char)>, num_workers:usize, base_cost:u32) -> String {
+    let mut workers = BinaryHeap::new();
+    let mut taken = vec![];
+    let mut t = 0;
+    let mut res = vec![];
+
+    // Which of the parents is not a child node?
+    while !input.is_empty() {
+
+        let mut root_nodes:Vec<char> = peek_root_nodes(&input).iter()
+            .filter( |&p| !taken.contains(p)).map(|p|*p).collect();
+
+        //println!("Fetched {:?}", root_nodes);
+
+        // Fetch
+        while workers.len() < num_workers && !root_nodes.is_empty() {
+            // Fetch available root nodes, not already taken
+
+            // Allocate worker
+            let item = *root_nodes.first().unwrap();
+            root_nodes.remove(0);
+            taken.push(item );
+            let effort = (item as u32 - 'A' as u32 + 1 + base_cost) as u32;
+            let worker = Worker { t_finish: t + effort, item: item };
+            //println!("Add item {} to worker, will finish as t={}", item, worker.t_finish);
+            workers.push(worker);
+        }
+
+
+        // Process first step
+        let t1 = workers.peek().unwrap().t_finish;
+        t = t1;
+        while workers.peek().is_some() && workers.peek().unwrap().t_finish == t {
+            let finished_worker = workers.pop().unwrap();
+            //println!("Finished {} at time {}", finished_worker.item, finished_worker.t_finish);
+
+            if input.len() == 1 {
+                let last = input.pop().unwrap();
+                res.push(last.0);
+                res.push(last.1);
+                let effort = (last.1 as u32 - 'A' as u32 + 1 + base_cost) as u32;
+                t += effort;
+
+                //println!("Finished {} at time {}", last.1, t);
+                return format!("{}",t);
+            } else {
+                remove_node(finished_worker.item, &mut input);
+                res.push(finished_worker.item);
+            }
+        }
+    }
+
+    String::from("0")
 }
 
 
@@ -211,5 +309,20 @@ Step R must be finished before step G can begin.
         let res = part1(parse(INPUT_REAL.lines().collect()));
         println!("{:?}",res);
         assert_eq!("IOFSJQDUWAPXELNVYZMHTBCRGK",res);
+    }
+
+
+    #[test]
+    fn test2() {
+        let res = part2(parse(INPUT.lines().collect()),2,0);
+        println!("{:?}",res);
+        assert_eq!("15",res);
+    }
+
+    #[test]
+    fn test_part2() {
+        let res = part2(parse(INPUT_REAL.lines().collect()),5,60);
+        println!("{:?}",res);
+        assert_eq!("931",res);
     }
 }
