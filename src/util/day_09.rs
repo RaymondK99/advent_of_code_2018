@@ -25,7 +25,6 @@ fn parse(input:&str) -> (u32,u32) {
 fn part1(input:(u32,u32)) -> u32 {
     let (players, last_marble) = input;
     let mut circle = VecDeque::new();
-    let mut last_marble_pos = 0;
     let mut scores = vec![];
 
     for _ in 0..players {
@@ -38,30 +37,24 @@ fn part1(input:(u32,u32)) -> u32 {
         if next_marble % 23 == 0 && next_marble > 0 {
             // Special case..
             scores[current_player as usize] += next_marble;
-            if last_marble_pos >= 7 {
-                last_marble_pos -= 7;
-            } else {
-                last_marble_pos = circle.len() - (7 - last_marble_pos);
-            }
 
-            scores[current_player as usize] += circle.remove(last_marble_pos as usize).unwrap();
+            for _ in 0..7 {
+                let marble = circle.pop_back().unwrap();
+                circle.push_front(marble);
+            }
+            scores[current_player as usize] += circle.pop_front().unwrap();
             continue;
         }
 
-        if next_marble >  0 && circle.len() > 1 {
-            let pos = last_marble_pos + 2;
-
-            //println!("last_pos={}, new_pos={}, len={}",last_marble_pos,pos,circle.len());
-            if pos == circle.len() {
-                circle.push_back(next_marble);
-                last_marble_pos = pos;
-            } else {
-                last_marble_pos = pos % circle.len();
-                circle.insert(pos % circle.len(), next_marble);
-            }
-        } else {
+        if next_marble == 0 {
             circle.push_back(next_marble);
-            last_marble_pos = circle.len()-1;
+        } else {
+            // Shift the ring clock-wise
+            for _ in 0..2 {
+                let current_marble = circle.pop_front().unwrap();
+                circle.push_back(current_marble);
+            }
+            circle.push_front(next_marble);
         }
     }
 
@@ -69,13 +62,14 @@ fn part1(input:(u32,u32)) -> u32 {
 }
 
 fn part2(input:(u32,u32)) -> u32 {
-    2
+    part1((input.0, input.1 * 100))
 }
 
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
+
 
 
     #[test]
@@ -118,5 +112,21 @@ mod tests {
         println!("{}",res);
         assert_eq!(408679,res);
     }
+
+    #[test]
+    fn test_part2() {
+        let input="424 players; last marble is worth 71482 points";
+        let res = part2(parse(input));
+        println!("{}",res);
+        assert_eq!(3443939356,res);
+    }
+
+
+
+
+
+
+
+
 
 }
