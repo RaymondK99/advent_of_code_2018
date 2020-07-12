@@ -206,6 +206,7 @@ mod tests {
 
         let res = part1(input);
         println!("{:?}",res);
+        assert_eq!((7,3), res);
 
     }
 
