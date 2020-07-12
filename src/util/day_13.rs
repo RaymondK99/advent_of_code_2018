@@ -1,5 +1,5 @@
 use super::Part;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use std::cmp::Ordering;
 
 pub fn solve(input : String, part: Part) -> String {
@@ -20,7 +20,7 @@ enum Direction {
     RIGHT,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy)]
 struct Cart {
     x:i32,
     y:i32,
@@ -117,32 +117,15 @@ impl Map {
         Map{map:map,carts:carts}
     }
 
-    fn print_state(&self) {
-        let max_x = self.map.keys().map(|(x,_)| *x).max().unwrap();
-        let max_y = self.map.keys().map(|(y,_)| *y).max().unwrap();
 
-        for y in 0..=max_y {
-            for x in 0..=max_x {
-                let item = self.map.get(&(x,y));
-                let cart = self.carts.iter().find(|&c| c.x == x && c.y == y);
-                if item.is_some(){
-                    if cart.is_some() {
-                        print!("{}",cart.unwrap().num);
-                    } else {
-                        print!("{}", *item.unwrap());
-                    }
-                }
-            }
-            println!();
-        }
-    }
-
-    fn run(&mut self) -> (i32,i32) {
+    fn run(&mut self, remove_crashed:bool) -> (i32,i32) {
+        let mut to_move:Vec<Cart> = self.carts.iter_mut().map(|c| (*c).clone()).collect();
+        let mut moved: Vec<Cart> = vec![];
 
         loop {
 
-            let mut list:Vec<&mut Cart> = self.carts.iter_mut().collect();
-            list.sort_by(|a,b| {
+            // Move the first carts from the top
+            to_move.sort_by(|a, b| {
                 let ord1 = a.y.cmp(&b.y);
                 let ord2 = a.x.cmp(&b.x);
                 if ord1 == Ordering::Equal {
@@ -152,22 +135,54 @@ impl Map {
                 }
             });
 
-            for _ in 0..list.len() {
-                let cart = list.remove(0);
+            // Move each cart one by one
+            while !to_move.is_empty() {
+                let mut cart = to_move.remove(0);
                 cart.next_pos(&self.map);
 
                 // Check collisions with other carts
-                let mut set = HashSet::new();
-                for n in 0..list.len() {
-                    set.insert((list[n].x,list[n].y));
+                let mut crash = false;
+
+                for n in 0..to_move.len() {
+                    if cart.x == to_move[n].x && cart.y == to_move[n].y {
+                        // Crash
+                        if remove_crashed {
+                            to_move.remove(n);
+                            crash = true;
+                            break;
+                        } else {
+                            return (cart.x, cart.y);
+                        }
+                    }
                 }
 
-                // Is next position a collision with other carts?
-                if set.contains(&(cart.x, cart.y)) {
-                    return (cart.x,cart.y);
+                for n in 0..moved.len() {
+                    if cart.x == moved[n].x && cart.y == moved[n].y {
+                        // Crash
+                        if remove_crashed {
+                            moved.remove(n);
+                            crash = true;
+                            break;
+                        } else {
+                            return (cart.x, cart.y);
+                        }
+                    }
                 }
 
-                list.push(cart);
+                if !crash {
+                    moved.push(cart);
+                }
+            }
+
+            // Push back carts in "to be moved" list
+            while !moved.is_empty() {
+                to_move.push(moved.pop().unwrap());
+            }
+
+            // Check for exit critera
+            if remove_crashed && to_move.len() == 1 {
+                let cart = to_move.remove(0);
+                return (cart.x, cart.y);
             }
         }
     }
@@ -177,17 +192,14 @@ impl Map {
 
 fn part1(input:&str) -> (i32,i32) {
     let mut map = Map::new(input);
-    map.run()
+    map.run(false)
 
 }
 
 fn part2(input:&str) -> (i32,i32) {
-    (0,0)
+    let mut map = Map::new(input);
+    map.run(true)
 }
-
-
-
-
 
 
 #[cfg(test)]
@@ -208,6 +220,38 @@ mod tests {
         println!("{:?}",res);
         assert_eq!((7,3), res);
 
+    }
+
+    #[test]
+    fn test2() {
+        let input = r"/>-<\
+|   |
+| /<+-\
+| | | v
+\>+</ |
+  |   ^
+  \<->/";
+
+        let res = part2(input);
+        println!("{:?}",res);
+        assert_eq!((6,4), res);
+
+    }
+
+    #[test]
+    fn test_part1() {
+        let input = include_str!("../../input_13.txt");
+        let res = part1(input);
+        println!("{:?}",res);
+        assert_eq!((100,21), res);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input = include_str!("../../input_13.txt");
+        let res = part2(input);
+        println!("{:?}",res);
+        assert_eq!((113,109), res);
     }
 
 
