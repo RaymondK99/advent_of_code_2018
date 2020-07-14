@@ -25,7 +25,7 @@ enum Position {
 struct Map {
     map:HashMap<(i32,i32),Position>,
     elf_attack:i32,
-    num_elfs:i32,
+    num_elves:i32,
     num_goblins:i32,
 }
 
@@ -49,7 +49,7 @@ impl Map {
             });
         });
 
-        Map { map: map,elf_attack:elf_attack,num_goblins:goblin_id,num_elfs:elf_id }
+        Map { map: map,elf_attack:elf_attack,num_goblins:goblin_id, num_elves:elf_id }
     }
 
     fn calc_hitpoints(&self) -> i32 {
@@ -67,7 +67,7 @@ impl Map {
     }
 
     fn is_finished(&self) -> bool {
-        self.num_elfs == 0 || self.num_goblins == 0
+        self.num_elves == 0 || self.num_goblins == 0
     }
 
     fn do_moves(&mut self) -> bool {
@@ -117,7 +117,7 @@ impl Map {
                         *hp -= 3;
                         if *hp <= 0 {
                             self.map.insert(attack_pos, Empty);
-                            self.num_elfs -= 1;
+                            self.num_elves -= 1;
                         }
                     }
                     Goblin {ref mut hp,..} => {
@@ -341,7 +341,7 @@ fn part2(input:&str) -> i32 {
     loop {
         let mut moves = 0;
         let mut  map = Map::new(input,attack);
-        let num_elves = map.num_elfs;
+        let num_elves = map.num_elves;
         while !map.is_finished() {
             let full_move = map.do_moves();
             if full_move {
@@ -349,7 +349,7 @@ fn part2(input:&str) -> i32 {
             }
         }
 
-        if num_elves == map.num_elfs {
+        if num_elves == map.num_elves {
             return moves * map.calc_hitpoints();
         }
 
