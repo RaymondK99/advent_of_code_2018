@@ -148,5 +148,5 @@ mod tests {
         let res = part1(INPUT_REAL);
         println!("res={}",res);
     }
-    
+
 }

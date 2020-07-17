@@ -1,6 +1,7 @@
 use super::Part;
 use std::collections::{HashMap};
 use regex::Regex;
+use std::ops::Index;
 
 pub fn solve(input : String, part: Part) -> String {
 
@@ -303,7 +304,12 @@ impl Computer {
                     }
 
                     while item.contains(instr_list) {
-                        item.remove_item(instr_list);
+                        for j in 0..item.len() {
+                            if item[j] == *instr_list {
+                                item.remove(j);
+                                break;
+                            }
+                        }
                     }
                 }
             }
