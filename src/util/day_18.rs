@@ -12,33 +12,37 @@ pub fn solve(input : String, part: Part) -> String {
     format!("{}",result)
 }
 
+fn perform_generation(map:&mut HashMap<(i32,i32),char>) {
+    let mut updates = vec![];
+    map.iter().for_each(|(pos, ch)| {
+        // Get Adjacent nodes
+        let (x, y) = *pos;
+        let adjacent_pos = vec![(x + 1, y), (x - 1, y), (x, y - 1), (x, y + 1), (x - 1, y - 1), (x - 1, y + 1), (x + 1, y + 1), (x + 1, y - 1)];
+        let adjacent_nodes: Vec<char> = adjacent_pos.iter().map(|(x, y)| map.get(&(*x, *y))).filter(|item|item.is_some()).map(|c| *c.unwrap()).collect();
+
+        let trees = adjacent_nodes.iter().filter(|&ch| *ch == '|').count();
+        let lumber_yard = adjacent_nodes.iter().filter(|&ch| *ch == '#').count();
+
+        if *ch == '.' && trees > 2 {
+            updates.push(((x, y), '|'));
+        } else if *ch == '|' && lumber_yard > 2 {
+            updates.push(((x, y), '#'));
+        } else if *ch == '#' && (lumber_yard == 0 || trees == 0) {
+            updates.push(((x, y), '.'));
+        }
+    });
+
+    while !updates.is_empty() {
+        let ((x, y), ch) = updates.pop().unwrap();
+        map.insert((x, y), ch);
+    }
+}
+
 fn part1(input:&str) -> usize {
     let mut map = parse(input);
-    let mut updates = vec![];
 
     for _ in 0..10 {
-        map.iter().for_each(|(pos, ch)| {
-            // Get Adjacent nodes
-            let (x, y) = *pos;
-            let adjacent_pos = vec![(x + 1, y), (x - 1, y), (x, y - 1), (x, y + 1), (x - 1, y - 1), (x - 1, y + 1), (x + 1, y + 1), (x + 1, y - 1)];
-            let adjacent_nodes: Vec<char> = adjacent_pos.iter().map(|(x, y)| map.get(&(*x, *y))).filter(|item|item.is_some()).map(|c| *c.unwrap()).collect();
-
-            let trees = adjacent_nodes.iter().filter(|&ch| *ch == '|').count();
-            let lumber_yard = adjacent_nodes.iter().filter(|&ch| *ch == '#').count();
-
-            if *ch == '.' && trees > 2 {
-                updates.push(((x, y), '|'));
-            } else if *ch == '|' && lumber_yard > 2 {
-                updates.push(((x, y), '#'));
-            } else if *ch == '#' && (lumber_yard == 0 || trees == 0) {
-                updates.push(((x, y), '.'));
-            }
-        });
-
-        while !updates.is_empty() {
-            let ((x, y), ch) = updates.pop().unwrap();
-            map.insert((x, y), ch);
-        }
+        perform_generation(&mut map);
     }
 
     map.iter().filter(|&(_,ch)| *ch == '|').count() * map.iter().filter(|&(_,ch)| *ch == '#').count()
@@ -46,6 +50,7 @@ fn part1(input:&str) -> usize {
 
 
 fn part2(input:&str) -> usize {
+    let mut map = parse(input);
     2
 }
 
@@ -143,6 +148,5 @@ mod tests {
         let res = part1(INPUT_REAL);
         println!("res={}",res);
     }
-
-
+    
 }
