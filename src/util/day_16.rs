@@ -1,7 +1,6 @@
 use super::Part;
 use std::collections::{HashMap};
 use regex::Regex;
-use std::ops::Index;
 
 pub fn solve(input : String, part: Part) -> String {
 

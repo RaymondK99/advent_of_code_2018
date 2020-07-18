@@ -5,14 +5,14 @@ use regex::Regex;
 pub fn solve(input : String, part: Part) -> String {
 
     let result = match part {
-        Part::Part1 => part1(input.as_str()),
+        Part::Part1 => part1(input.as_str(),10),
         Part::Part2 => part2(input.as_str())
     };
 
     format!("{}",result)
 }
 
-fn perform_generation(map:&mut HashMap<(i32,i32),char>) {
+fn perform_generation(map:&mut HashMap<(i64,i64),char>) {
     let mut updates = vec![];
     map.iter().for_each(|(pos, ch)| {
         // Get Adjacent nodes
@@ -38,10 +38,10 @@ fn perform_generation(map:&mut HashMap<(i32,i32),char>) {
     }
 }
 
-fn part1(input:&str) -> usize {
+fn part1(input:&str,gen:usize) -> usize {
     let mut map = parse(input);
 
-    for _ in 0..10 {
+    for _ in 0..gen {
         perform_generation(&mut map);
     }
 
@@ -51,15 +51,33 @@ fn part1(input:&str) -> usize {
 
 fn part2(input:&str) -> usize {
     let mut map = parse(input);
-    2
+    let mut previous_generations = HashMap::new();
+    let mut generation = 0;
+    let mut matches = 0;
+
+    while matches < 4 {
+        previous_generations.insert(to_string(&map), generation);
+        perform_generation(&mut map);
+        generation += 1;
+
+        if previous_generations.contains_key(&to_string(&map)) {
+            let first = *previous_generations.get(&to_string(&map)).unwrap();
+            let period = generation - first;
+            let end = 1000_000_000;
+            let mut target = (end - first) % period;
+            target += first;
+            return part1(input,target);
+        }
+    }
+    panic!("No answer")
 }
 
-fn parse(input:&str) -> HashMap<(i32,i32),char> {
+fn parse(input:&str) -> HashMap<(i64,i64),char> {
     let mut map = HashMap::new();
 
     input.lines().enumerate().for_each(|(y,line)|{
         line.chars().enumerate().for_each(|(x,ch)|{
-            map.insert((x as i32,y as i32),ch);
+            map.insert((x as i64,y as i64),ch);
         });
     });
 
@@ -67,6 +85,20 @@ fn parse(input:&str) -> HashMap<(i32,i32),char> {
     map
 }
 
+fn to_string(map:&HashMap<(i64,i64),char>) -> String {
+    let mut s = String::new();
+
+    let max_x = map.iter().map(|((x,_),_)| *x).max().unwrap();
+    let max_y = map.iter().map(|((_,y),_)| *y).max().unwrap();
+
+    for y in 0..=max_y {
+        for x in 0..=max_x {
+            s.push(*map.get(&(x,y)).unwrap());
+        }
+        s.push('\n');
+    }
+    s
+}
 
 #[cfg(test)]
 mod tests {
@@ -139,14 +171,15 @@ mod tests {
 
     #[test]
     fn test1() {
-        let res = part1(INPUT);
+        let res = part1(INPUT,10);
         println!("res={}",res);
     }
 
     #[test]
     fn test_part1() {
-        let res = part1(INPUT_REAL);
+        let res = part1(INPUT_REAL,10);
         println!("res={}",res);
+        assert_eq!(560091,res);
     }
 
 }
