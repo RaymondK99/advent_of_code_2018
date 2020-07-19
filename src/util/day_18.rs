@@ -53,7 +53,7 @@ fn part2(input:&str) -> usize {
     let mut map = parse(input);
     let mut previous_generations = HashMap::new();
     let mut generation = 0;
-
+    
     loop {
         previous_generations.insert(to_string(&map), generation);
         perform_generation(&mut map);
