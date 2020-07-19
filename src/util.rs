@@ -22,6 +22,7 @@ mod day_21;
 mod day_23;
 mod day_24;
  */
+mod opcode;
 
 pub enum Part {
     Part1,

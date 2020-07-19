@@ -1,6 +1,5 @@
 use super::Part;
-use std::collections::{HashMap, HashSet, VecDeque};
-use regex::Regex;
+use std::collections::{HashMap};
 
 pub fn solve(input : String, part: Part) -> String {
 
@@ -53,7 +52,7 @@ fn part2(input:&str) -> usize {
     let mut map = parse(input);
     let mut previous_generations = HashMap::new();
     let mut generation = 0;
-    
+
     loop {
         previous_generations.insert(to_string(&map), generation);
         perform_generation(&mut map);
@@ -68,7 +67,6 @@ fn part2(input:&str) -> usize {
             return part1(input,target);
         }
     }
-    panic!("No answer")
 }
 
 fn parse(input:&str) -> HashMap<(i64,i64),char> {

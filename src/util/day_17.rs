@@ -1,6 +1,5 @@
 use super::Part;
 use std::collections::{HashMap, HashSet, VecDeque};
-use regex::Regex;
 
 pub fn solve(input : String, part: Part) -> String {
 
