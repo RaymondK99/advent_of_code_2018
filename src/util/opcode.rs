@@ -26,7 +26,7 @@ impl OpCode {
         match self {
             OpCode::ADDI => (false,true),
             OpCode::MULTI => (false,true),
-            OpCode::SETI => (true,false),
+            OpCode::SETI => (true,true),
             OpCode::BORI => (false,true),
             OpCode::BANI => (false,true),
             OpCode::GTIR => (true,false),
@@ -157,7 +157,28 @@ pub struct Computer {
 
 impl Computer {
     pub fn new() -> Computer {
-        Computer{registers:vec![0,0,0,0],map_codes:HashMap::new()}
+        Computer{registers:vec![0,0,0,0,0,0],map_codes:HashMap::new()}
+    }
+
+    pub fn run_program_with_pc(&mut self, pc_reg_no:usize, program:Vec<(OpCode,usize,usize,usize)>) {
+        let mut pc = 0;
+
+        loop {
+            // Load instruction pointer to register linked to it
+            self.registers[pc_reg_no] = pc as i64;
+
+            let instr = program[pc];
+            self.run_instruction(instr);
+
+            // Fetch PC from reg
+            pc = self.registers[pc_reg_no] as usize + 1;
+
+            // Check out of bounds
+            if pc >= program.len() {
+                println!("End program, reg {} has value:{}",pc_reg_no,self.registers[pc_reg_no]);
+                break;
+            }
+        }
     }
 
     pub fn run_instruction(&mut self, instr:(OpCode,usize,usize,usize)) {
@@ -208,7 +229,7 @@ impl Computer {
             // Run instr
             self.run_instruction(instr);
 
-            if self.registers.eq(out_state) {
+            if self.registers[0..4].eq(&out_state[0..4]) {
                 result.push(opcode)
             }
 
