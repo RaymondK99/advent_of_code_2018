@@ -63,7 +63,33 @@ fn part1(input:&str) -> i64 {
 
 
 fn part2(input:&str) -> i64 {
-    2
+    let mut comp = Computer::new();
+    let (pc_reg_no, program) = parse_ip_program(input);
+
+    let mut pc = 0;
+
+    comp.set_register_value(0,1);
+
+    while comp.get_register_value(1) != 1 {
+        // Load instruction pointer to register linked to it
+        comp.set_register_value(pc_reg_no, pc as i64);
+
+        let instr = program[pc];
+        comp.run_instruction(instr);
+
+        // Fetch PC from reg
+        pc = comp.get_register_value(pc_reg_no) as usize + 1;
+    }
+
+    let mut sum = 0;
+    let number = *comp.get_registers().iter().max().unwrap();
+    for i in 1..=number {
+        if number % i == 0 {
+            sum += i;
+        }
+    }
+
+    sum
 }
 
 
@@ -134,6 +160,13 @@ seti 9 0 5";
         let res = part1(INPUT_REAL);
         println!("res={}",res);
         assert_eq!(993,res);
+    }
+
+    #[test]
+    fn test_part2() {
+        let res = part2(INPUT_REAL);
+        println!("res={}",res);
+        assert_eq!(10708912,res);
     }
 
 }

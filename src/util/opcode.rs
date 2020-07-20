@@ -26,7 +26,7 @@ impl OpCode {
         match self {
             OpCode::ADDI => (false,true),
             OpCode::MULTI => (false,true),
-            OpCode::SETI => (true,true),
+            OpCode::SETI => (true,true) ,
             OpCode::BORI => (false,true),
             OpCode::BANI => (false,true),
             OpCode::GTIR => (true,false),
@@ -294,8 +294,16 @@ impl Computer {
         (result,program)
     }
 
+    pub fn set_register_value(&mut self,index:usize,value:i64) {
+        self.registers[index] = value;
+    }
+
     pub fn get_register_value(&self,index:usize) -> i64 {
         self.registers[index]
+    }
+
+    pub fn get_registers(&self) -> &Vec<i64> {
+        self.registers.as_ref()
     }
 
     pub fn solve_opcodes(&mut self, mut mappings:Vec<(usize, Vec<OpCode>)>) {
