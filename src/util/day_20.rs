@@ -13,11 +13,12 @@ pub fn solve(input : String, part: Part) -> String {
 }
 
 
-fn part1(input:&str) -> i64 {
+fn bfs(input:&str) -> (i64,i64) {
     let map = parse(input.chars().collect());
 
     let mut queue = VecDeque::new();
     let mut dist_max = 0;
+    let mut n_doors_above_1000 = 0;
     let mut visited = HashSet::new();
     queue.push_back((0,0,0));
 
@@ -34,6 +35,10 @@ fn part1(input:&str) -> i64 {
 
         let next_dist = dist + 1;
         dist_max = std::cmp::max(dist_max, dist);
+
+        if dist >= 1000 {
+            n_doors_above_1000 += 1;
+        }
 
         // Up?
         let up_pos = map.get(&(x,y-1));
@@ -60,12 +65,14 @@ fn part1(input:&str) -> i64 {
         }
     }
 
-    dist_max as i64
+    (dist_max as i64,n_doors_above_1000)
 }
 
-
+fn part1(input:&str) -> i64 {
+    bfs(input).0
+}
 fn part2(input:&str) -> i64 {
-    2
+    bfs(input).1
 }
 
 fn get_options(input:&Vec<char>, curr:&Position) -> Vec<Position> {
@@ -262,5 +269,20 @@ mod tests {
         assert_eq!(31,res);
     }
 
+    #[test]
+    fn test_part1() {
+        let input= include_str!("../../input_20.txt");
+        let res = part1(input);
+        println!("res={}",res);
+        assert_eq!(4018,res);
+    }
+
+    #[test]
+    fn test_part2() {
+        let input= include_str!("../../input_20.txt");
+        let res = part2(input);
+        println!("res={}",res);
+        assert_eq!(8581,res);
+    }
 
 }
