@@ -98,7 +98,6 @@ fn part2(input:&str) -> i64 {
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-    use crate::util::opcode::*;
 
     const INPUT_REAL:&str = "#ip 3
 addi 3 16 3
