@@ -160,6 +160,47 @@ impl Computer {
         Computer{registers:vec![0,0,0,0,0,0],map_codes:HashMap::new()}
     }
 
+    pub fn parse_ip_program(input:&str) -> (usize, Vec<(OpCode,usize,usize,usize)>) {
+        let mut lines:Vec<&str> = input.lines().collect();
+        let mut instructions = vec![];
+        // First line is #ip directive
+        let first_line = lines.remove(0);
+        let ip_reg:usize = first_line.split_whitespace().last().unwrap().parse().ok().unwrap();
+
+        for instr in lines {
+            let fields:Vec<&str> = instr.split_whitespace().collect();
+            let instr_name = fields[0];
+            let a:usize = fields[1].parse().ok().unwrap();
+            let b:usize = fields[2].parse().ok().unwrap();
+            let c:usize = fields[3].parse().ok().unwrap();
+
+            let opcode = match instr_name {
+                "addi" => OpCode::ADDI,
+                "addr" => OpCode::ADDR,
+                "seti" => OpCode::SETI,
+                "setr" => OpCode::SETR,
+                "muli" => OpCode::MULTI,
+                "mulr" => OpCode::MULTR,
+                "bani" => OpCode::BANI,
+                "banr" => OpCode::BANR,
+                "bori" => OpCode::BORI,
+                "borr" => OpCode::BORR,
+                "gtrr" => OpCode::GTRR,
+                "gtir" => OpCode::GTIR,
+                "grri" => OpCode::GTRI,
+                "eqrr" => OpCode::EQRR,
+                "eqri" => OpCode::EQRI,
+                "eqir" => OpCode::EQIR,
+                _ => panic!("unknown:{}",instr_name),
+
+            };
+
+            instructions.push((opcode,a,b,c));
+        }
+
+        (ip_reg,instructions)
+    }
+
     pub fn run_program_with_pc(&mut self, pc_reg_no:usize, program:Vec<(OpCode,usize,usize,usize)>) {
         let mut pc = 0;
 

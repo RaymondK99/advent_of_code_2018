@@ -13,50 +13,10 @@ pub fn solve(input : String, part: Part) -> String {
     format!("{}",result)
 }
 
-fn parse_ip_program(input:&str) -> (usize, Vec<(OpCode,usize,usize,usize)>) {
-    let mut lines:Vec<&str> = input.lines().collect();
-    let mut instructions = vec![];
-    // First line is #ip directive
-    let first_line = lines.remove(0);
-    let ip_reg:usize = first_line.split_whitespace().last().unwrap().parse().ok().unwrap();
-
-    for instr in lines {
-        let fields:Vec<&str> = instr.split_whitespace().collect();
-        let instr_name = fields[0];
-        let a:usize = fields[1].parse().ok().unwrap();
-        let b:usize = fields[2].parse().ok().unwrap();
-        let c:usize = fields[3].parse().ok().unwrap();
-
-        let opcode = match instr_name {
-            "addi" => ADDI,
-            "addr" => ADDR,
-            "seti" => SETI,
-            "setr" => SETR,
-            "muli" => MULTI,
-            "mulr" => MULTR,
-            "bani" => BANI,
-            "banr" => BANR,
-            "bori" => BORI,
-            "borr" => BORR,
-            "gtrr" => GTRR,
-            "gtir" => GTIR,
-            "grri" => GTRI,
-            "eqrr" => EQRR,
-            "eqri" => EQRI,
-            "eqir" => EQIR,
-            _ => panic!("unknown:{}",instr_name),
-
-        };
-
-        instructions.push((opcode,a,b,c));
-    }
-
-    (ip_reg,instructions)
-}
 
 fn part1(input:&str) -> i64 {
     let mut comp = Computer::new();
-    let (pc_reg_no, program) = parse_ip_program(input);
+    let (pc_reg_no, program) = Computer::parse_ip_program(input);
     comp.run_program_with_pc(pc_reg_no, program);
     comp.get_register_value(0)
 }
@@ -64,7 +24,7 @@ fn part1(input:&str) -> i64 {
 
 fn part2(input:&str) -> i64 {
     let mut comp = Computer::new();
-    let (pc_reg_no, program) = parse_ip_program(input);
+    let (pc_reg_no, program) = Computer::parse_ip_program(input);
 
     let mut pc = 0;
 
