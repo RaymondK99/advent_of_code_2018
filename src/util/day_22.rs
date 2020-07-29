@@ -239,9 +239,6 @@ target: 10,715";
         let res = part2(input);
         println!("res={}",res);
         assert_eq!(980,res);
-
     }
-
-
 
 }
