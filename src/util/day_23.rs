@@ -39,7 +39,7 @@ fn part1(input:&str) -> i64 {
         .count() as i64
 }
 
-fn part2(input:&str) -> i64 {
+fn part2(_input:&str) -> i64 {
     2
 }
 

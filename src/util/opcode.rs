@@ -195,6 +195,7 @@ impl Computer {
 
             };
 
+
             instructions.push((opcode,a,b,c));
         }
 

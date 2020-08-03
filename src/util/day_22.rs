@@ -201,7 +201,7 @@ mod tests {
 
     #[test]
     fn test1() {
-        let map = calc_map((10,10),510);
+        let _map = calc_map((10,10),510);
     }
 
     #[test]
